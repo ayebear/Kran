@@ -79,7 +79,7 @@
         this.components[compId].collectionsRequieringComp.push(newCol)
       }, this)
     }
-    return this.entityCollections[key] 
+    return this.entityCollections[key]
   }
 
   // ***********************************************
@@ -124,6 +124,14 @@
   Kran.prototype.run = function(group) {
     this.systemGroups[group].members.forEach(function (member) {
       member.run()
+    })
+  }
+
+  Kran.prototype.init = function(group) {
+    this.systemGroups[group].members.forEach(function (member) {
+      if (isFunc(member.init)) {
+        member.init()
+      }
     })
   }
 
@@ -225,7 +233,7 @@
   }
 
   function getCompId(compId) {
-    if (typeof compId === "number") { 
+    if (typeof compId === "number") {
       return compId
     } else if (typeof compId === "object" && typeof compId.id === "number") {
       return compId.id
@@ -313,7 +321,7 @@
 
   LinkedList.prototype.forEach = function(func, context) {
     var elm, nextElm = this.head
-    
+
     while (nextElm !== null) {
       elm = nextElm
       nextElm = elm.next
