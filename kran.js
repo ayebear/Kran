@@ -192,7 +192,11 @@
 
   Entity.prototype.remove = function(compId) {
     compId = getCompId(compId)
-    if (this.comps[compId] === undefined) throw new Error("The entity doesn't have the component")
+    let comp = this.comps[compId]
+    if (comp === undefined) throw new Error("The entity doesn't have the component")
+
+    triggerOnremove(comp)
+
     this.comps[compId] = undefined
     this.belongsTo.forEach(function (collBelonging, elm) {
       if (!qualifiesForCollection(this, collBelonging.comps)) {
@@ -210,6 +214,11 @@
   }
 
   Entity.prototype.delete = function() {
+    for (let comp of this.comps) {
+      if (comp) {
+        triggerOnremove(comp)
+      }
+    }
     this.belongsTo.forEach(function (collBelonging, elm) {
       collBelonging.entry.remove()
     })
@@ -238,7 +247,7 @@
     } else if (typeof compId === "object" && typeof compId.id === "number") {
       return compId.id
     }
-    throw new TypeError(compId + " is not a component id or an oject containing an id")
+    throw new TypeError(compId + " is not a component id or an object containing an id")
   }
 
   var qualifiesForCollection = function (ent, comps) {
@@ -248,6 +257,13 @@
       }
       return true
     })
+  }
+
+  function triggerOnremove(comp) {
+    // Call onremove method before removing a component
+    if ('onremove' in comp && isFunc(comp.onremove)) {
+      comp.onremove()
+    }
   }
 
   // ***********************************************
@@ -262,11 +278,7 @@
   // Helper functions
   //
   var isFunc = function(func) {
-    if (typeof func === 'function') {
-      return true
-    } else {
-      return false
-    }
+    return (typeof func === 'function')
   }
 
   var wrapInArray = function(arg) {
